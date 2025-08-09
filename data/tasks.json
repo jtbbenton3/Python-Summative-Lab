@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Set up repo",
+    "status": "done",
+    "project_id": 1,
+    "assigned_to": "alex@example.com"
+  },
+  {
+    "id": 2,
+    "title": "Write homepage HTML",
+    "status": "todo",
+    "project_id": 1,
+    "assigned_to": "alex@example.com"
+  }
+]

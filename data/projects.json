@@ -3,7 +3,14 @@
     "id": 1,
     "title": "CLI Tool",
     "description": "Build the CLI",
-    "due_date": "2025-09-01",
-    "owner_email": "alex@example.com"
+    "owner_email": "alex@example.com",
+    "due_date": "2025-09-01"
+  },
+  {
+    "id": 2,
+    "title": "Website Redesign",
+    "description": "Revamp the landing page",
+    "owner_email": "jamie@example.com",
+    "due_date": "2025-10-15"
   }
 ]
