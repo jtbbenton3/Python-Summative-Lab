@@ -1,8 +1,13 @@
 import argparse
 from rich.table import Table
 from rich.console import Console
-from models.user import User
 
+from models.user import User
+from models.project import Project
+from models.task import Task
+
+
+# -------------------- Users --------------------
 def add_user(args):
     try:
         user = User.create(name=args.name, email=args.email)
@@ -11,8 +16,7 @@ def add_user(args):
         print(f"Error: {e}")
 
 def list_users(args):
-    users = User.all()
-    users = sorted(users, key=lambda u: u.name.lower())
+    users = sorted(User.all(), key=lambda u: u.name.lower())
     table = Table(title="Users")
     table.add_column("ID", justify="right")
     table.add_column("Name")
@@ -21,25 +25,69 @@ def list_users(args):
         table.add_row(str(u.id), u.name, u.email)
     Console().print(table)
 
+
+# -------------------- Projects --------------------
 def add_project(args):
-    print(f"[Placeholder] Adding project: title={args.title}, user_email={args.user_email}")
+    try:
+        proj = Project.create(
+            title=args.title,
+            description=args.description or "",
+            owner_email=args.user_email,
+            due_date=args.due_date,
+        )
+        print(f"Project created: id={proj.id}, title={proj.title}, owner={proj.owner_email}")
+    except ValueError as e:
+        print(f"Error: {e}")
 
 def list_projects(args):
-    print("[Placeholder] Listing all projects...")
+    projects = sorted(Project.all(), key=lambda p: p.title.lower())
+    table = Table(title="Projects")
+    table.add_column("ID", justify="right")
+    table.add_column("Title")
+    table.add_column("Owner Email")
+    table.add_column("Due Date")
+    table.add_column("Description")
+    for p in projects:
+        table.add_row(str(p.id), p.title, p.owner_email, p.due_date or "", p.description)
+    Console().print(table)
 
+
+# -------------------- Tasks --------------------
 def add_task(args):
-    print(f"[Placeholder] Adding task: title={args.title}, project_id={args.project_id}")
+    try:
+        task = Task.create(
+            title=args.title,
+            project_id=args.project_id,
+            status=args.status,
+            assigned_to=args.assigned_to,
+        )
+        print(f"Task created: id={task.id}, title={task.title}, project_id={task.project_id}, status={task.status}")
+    except ValueError as e:
+        print(f"Error: {e}")
 
 def list_tasks(args):
-    print("[Placeholder] Listing all tasks...")
+    tasks = Task.all()
+    table = Table(title="Tasks")
+    table.add_column("ID", justify="right")
+    table.add_column("Title")
+    table.add_column("Status")
+    table.add_column("Project ID", justify="right")
+    table.add_column("Assigned To")
+    for t in tasks:
+        table.add_row(str(t.id), t.title, t.status, str(t.project_id), t.assigned_to or "")
+    Console().print(table)
 
 def complete_task(args):
-    print(f"[Placeholder] Marking task {args.task_id} as complete")
+    try:
+        t = Task.mark_done(args.task_id)
+        print(f"Task {t.id} marked done.")
+    except ValueError as e:
+        print(f"Error: {e}")
 
+
+# -------------------- CLI --------------------
 def main():
-    parser = argparse.ArgumentParser(
-        description="Project Tracker CLI Tool"
-    )
+    parser = argparse.ArgumentParser(description="Project Tracker CLI Tool")
     subparsers = parser.add_subparsers(title="Commands")
 
     # add-user
@@ -56,6 +104,8 @@ def main():
     parser_add_project = subparsers.add_parser("add-project", help="Add a new project")
     parser_add_project.add_argument("--title", required=True, help="Project title")
     parser_add_project.add_argument("--user-email", required=True, help="Email of project owner")
+    parser_add_project.add_argument("--description", help="Project description", default="")
+    parser_add_project.add_argument("--due-date", help="Due date (YYYY-MM-DD)")
     parser_add_project.set_defaults(func=add_project)
 
     # list-projects
@@ -66,6 +116,8 @@ def main():
     parser_add_task = subparsers.add_parser("add-task", help="Add a new task")
     parser_add_task.add_argument("--title", required=True, help="Task title")
     parser_add_task.add_argument("--project-id", required=True, type=int, help="ID of the project")
+    parser_add_task.add_argument("--assigned-to", help="User email assigned to the task")
+    parser_add_task.add_argument("--status", choices=["todo", "done"], default="todo", help="Initial status")
     parser_add_task.set_defaults(func=add_task)
 
     # list-tasks
@@ -78,12 +130,11 @@ def main():
     parser_complete_task.set_defaults(func=complete_task)
 
     args = parser.parse_args()
-
-    # Run the chosen command
-    if hasattr(args, 'func'):
+    if hasattr(args, "func"):
         args.func(args)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()
