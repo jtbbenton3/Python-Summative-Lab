@@ -1,10 +1,25 @@
 import argparse
+from rich.table import Table
+from rich.console import Console
+from models.user import User
 
 def add_user(args):
-    print(f"[Placeholder] Adding user: name={args.name}, email={args.email}")
+    try:
+        user = User.create(name=args.name, email=args.email)
+        print(f"User created: id={user.id}, name={user.name}, email={user.email}")
+    except ValueError as e:
+        print(f"Error: {e}")
 
 def list_users(args):
-    print("[Placeholder] Listing all users...")
+    users = User.all()
+    users = sorted(users, key=lambda u: u.name.lower())
+    table = Table(title="Users")
+    table.add_column("ID", justify="right")
+    table.add_column("Name")
+    table.add_column("Email")
+    for u in users:
+        table.add_row(str(u.id), u.name, u.email)
+    Console().print(table)
 
 def add_project(args):
     print(f"[Placeholder] Adding project: title={args.title}, user_email={args.user_email}")
